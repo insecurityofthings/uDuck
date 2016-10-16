@@ -9,6 +9,11 @@ class DuckyParser(object):
     ''' Help map ducky like script to HID codes to be sent '''
 
     hid_map = {
+        '':           [0, 0],
+        'ALT':        [0, 4],
+        'SHIFT':      [0, 2],
+        'CTRL':       [0, 1],
+        'GUI':        [0, 8],
         'SCROLLLOCK': [71, 0],
         'ENTER':      [40, 0],
         'F12':        [69, 0],
@@ -73,28 +78,40 @@ class DuckyParser(object):
         for line in self.script:
             if line.startswith('ALT'):
                 entry = self.blank_entry.copy()
-                entry['char'] = line.split()[1]
+                if line.find(' ') == -1:
+                    entry['char'] = ''
+                else:
+                    entry['char'] = line.split()[1]
                 entry['hid'], mod = self.char_to_hid(entry['char'])
                 entry['mod'] = 4 | mod
                 entries.append(entry)
 
             elif line.startswith("GUI") or line.startswith('WINDOWS') or line.startswith('COMMAND'):
                 entry = self.blank_entry.copy()
-                entry['char'] = line.split()[1]
+                if line.find(' ') == -1:
+                    entry['char'] = ''
+                else:
+                    entry['char'] = line.split()[1]
                 entry['hid'], mod = self.char_to_hid(entry['char'])
                 entry['mod'] = 8 | mod
                 entries.append(entry)
 
             elif line.startswith('CTRL') or line.startswith('CONTROL'):
                 entry = self.blank_entry.copy()
-                entry['char'] = line.split()[1]
+                if line.find(' ') == -1:
+                    entry['char'] = ''
+                else:
+                    entry['char'] = line.split()[1]
                 entry['hid'], mod = self.char_to_hid(entry['char'])
                 entry['mod'] = 1 | mod
                 entries.append(entry)
 
             elif line.startswith('SHIFT'):
                 entry = self.blank_entry.copy()
-                entry['char'] = line.split()[1]
+                if line.find(' ') == -1:
+                    entry['char'] = ''
+                else:
+                    entry['char'] = line.split()[1]
                 entry['hid'], mod = self.char_to_hid(entry['char'])
                 entry['mod'] = 2 | mod
                 entries.append(entry)

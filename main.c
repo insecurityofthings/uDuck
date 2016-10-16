@@ -10,19 +10,14 @@
 #include "oddebug.h"
 #include "attack.h"
 
+static uchar reportBuffer[2];    // buffer for HID reports
+static uchar idleRate;           // in 4 ms units
+static uchar reportCount = 0;    // current report
+static unsigned long TimerDelay;  // counter for delay period
+static unsigned int index = 0;   // index into attack buffer
+static unsigned int attempt = 0; // track attempts for backoff interval
 
-/* ------------------------------------------------------------------------- */
-
-static uchar reportBuffer[2];    /* buffer for HID reports */
-static uchar idleRate;           /* in 4 ms units */
-static uchar reportCount = 0;		/* current report */
-static unsigned int	TimerDelay;		/* counter for delay period */
-static unsigned int index = 0;
-
-
-/* ------------------------------------------------------------------------- */
-
-PROGMEM const char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] = { /* USB report descriptor */
+PROGMEM const char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] = { // USB report descriptor
     0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
     0x09, 0x06,                    // USAGE (Keyboard)
     0xa1, 0x01,                    // COLLECTION (Application)
@@ -54,63 +49,51 @@ PROGMEM const char usbHidReportDescriptor[USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH] 
 
 static void buildReport(uchar mod, uchar key)
 {
-	reportCount++;
-    reportBuffer[0] = mod;    /* no modifiers */
+    reportCount++;
+    reportBuffer[0] = mod;
     reportBuffer[1] = key;
 }
 
 
 static void timerPoll(void)
 {
-	static unsigned int timerCnt;
+    static unsigned int timerCnt;
 
-    if(TIFR & (1 << TOV1)) {
+    if (TIFR & (1 << TOV1)) {
         TIFR = (1 << TOV1); // clear overflow
-        if(++timerCnt >= TimerDelay) { // check for end of pseudorandom delay
-			TimerDelay = 1;
-			timerCnt = 0;
+        if (++timerCnt >= TimerDelay) { // check for end of pseudorandom delay
+            TimerDelay = 1;
+            timerCnt = 0;
         }
     }
 }
-
-
-/* ------------------------------------------------------------------------- */
 
 static void timerInit(void)
 {
     TCCR1 = 0x0b; // select clock: 16.5M/1k -> overflow rate = 16.5M/256k = 62.94 Hz
 }
 
-
-/* ------------------------------------------------------------------------- */
-/* ------------------------ interface to USB driver ------------------------ */
-/* ------------------------------------------------------------------------- */
-
 uchar usbFunctionSetup(uchar data[8])
 {
     usbRequest_t *rq = (void *)data;
 
     usbMsgPtr = reportBuffer;
-    if((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS){    /* class request type */
-        if(rq->bRequest == USBRQ_HID_GET_REPORT){  /* wValue: ReportType (highbyte), ReportID (lowbyte) */
-            /* we only have one report type, so don't look at wValue */
+    if ((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS) { // class request type
+        if (rq->bRequest == USBRQ_HID_GET_REPORT) { // wValue: ReportType (highbyte), ReportID (lowbyte)
+            // we only have one report type, so don't look at wValue
             buildReport(0, 0);
             return sizeof(reportBuffer);
-        }else if(rq->bRequest == USBRQ_HID_GET_IDLE){
+        } else if (rq->bRequest == USBRQ_HID_GET_IDLE) {
             usbMsgPtr = &idleRate;
             return 1;
-        }else if(rq->bRequest == USBRQ_HID_SET_IDLE){
+        } else if(rq->bRequest == USBRQ_HID_SET_IDLE) {
             idleRate = rq->wValue.bytes[1];
         }
-    }else{
+    } else {
         /* no vendor specific requests implemented */
     }
-	return 0;
+    return 0;
 }
-
-/* ------------------------------------------------------------------------- */
-/* ------------------------ Oscillator Calibration ------------------------- */
-/* ------------------------------------------------------------------------- */
 
 /* Calibrate the RC oscillator to 8.25 MHz. The core clock of 16.5 MHz is
  * derived from the 66 MHz peripheral clock by dividing. Our timing reference
@@ -129,23 +112,24 @@ static void calibrateOscillator(void)
     uchar trialValue = 0, optimumValue;
     int x, optimumDev, targetValue = (unsigned)(1499 * (double)F_CPU / 10.5e6 + 0.5);
 
-    /* do a binary search: */
-    do{
+    // do a binary search:
+    do {
         OSCCAL = trialValue + step;
-        x = usbMeasureFrameLength();    /* proportional to current real frequency */
-        if(x < targetValue)             /* frequency still too low */
+        x = usbMeasureFrameLength();    // proportional to current real frequency
+        if(x < targetValue)             // frequency still too low
             trialValue += step;
         step >>= 1;
-    }while(step > 0);
+    } while(step > 0);
+
     /* We have a precision of +/- 1 for optimum OSCCAL here */
     /* now do a neighborhood search for optimum value */
     optimumValue = trialValue;
-    optimumDev = x; /* this is certainly far away from optimum */
-    for(OSCCAL = trialValue - 1; OSCCAL <= trialValue + 1; OSCCAL++){
+    optimumDev = x; // this is certainly far away from optimum
+    for (OSCCAL = trialValue - 1; OSCCAL <= trialValue + 1; OSCCAL++) {
         x = usbMeasureFrameLength() - targetValue;
-        if(x < 0)
+        if (x < 0)
             x = -x;
-        if(x < optimumDev){
+        if (x < optimumDev) {
             optimumDev = x;
             optimumValue = OSCCAL;
         }
@@ -166,19 +150,15 @@ both regions.
 void usbEventResetReady(void)
 {
     calibrateOscillator();
-    eeprom_write_byte(0, OSCCAL);   /* store the calibrated value in EEPROM */
+    eeprom_write_byte(0, OSCCAL); // store the calibrated value in EEPROM
 }
-
-/* ------------------------------------------------------------------------- */
-/* --------------------------------- main ---------------------------------- */
-/* ------------------------------------------------------------------------- */
 
 int main(void)
 {
     uchar i;
     uchar calibrationValue;
 
-    calibrationValue = eeprom_read_byte(0); /* calibration value from last time */
+    calibrationValue = eeprom_read_byte(0); // calibration value from last time
     
     if(calibrationValue != 0xff) {
         OSCCAL = calibrationValue;
@@ -187,7 +167,7 @@ int main(void)
     odDebugInit();
     usbDeviceDisconnect();
     
-    for (i = 0; i < 20; i++) {  /* 300 ms disconnect */
+    for (i = 0; i < 20; i++) {  // 300 ms disconnect
         _delay_ms(15);
     }
 
@@ -195,12 +175,12 @@ int main(void)
 
     wdt_enable(WDTO_1S);
     timerInit();
-	TimerDelay = 630; /* initial 10 second delay */
+    TimerDelay = 315; // initial 5 second delay
 
     usbInit();
     sei();
 
-    for (;;) {    /* main event loop */
+    for (;;) {    // main event loop
         wdt_reset();
         usbPoll();
 
@@ -223,7 +203,15 @@ int main(void)
                 usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
                 index = 0;
                 reportCount = 0;
-                TimerDelay = 2835 + rand(); // 1/63s * 63 * 30 + 0...32767
+                if (attempt == 0) {
+                    TimerDelay = 3780; // 60 seconds
+                    attempt++;
+                } else if (attempt == 1) {
+                    TimerDelay = 18900; // 5 mins
+                    attempt++;
+                } else {
+                    TimerDelay = 907200 + rand() * 8; // 4 hours + 0...64 minutes
+                }
             }
         }
         
