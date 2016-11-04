@@ -4,7 +4,7 @@ oddebug.o: ../usbdrv/oddebug.c ../usbdrv/oddebug.h ../usbdrv/iarcompat.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/inttypes.h \
  /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/include/stdint.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/stdint.h \
- /usr/local/CrossPack-AVR-20131216/avr/include/avr/iotn45.h \
+ /usr/local/CrossPack-AVR-20131216/avr/include/avr/iotn85.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/avr/iotnx5.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/avr/portpins.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/avr/common.h \
@@ -26,7 +26,7 @@ oddebug.o: ../usbdrv/oddebug.c ../usbdrv/oddebug.h ../usbdrv/iarcompat.h \
 
 /usr/local/CrossPack-AVR-20131216/avr/include/stdint.h:
 
-/usr/local/CrossPack-AVR-20131216/avr/include/avr/iotn45.h:
+/usr/local/CrossPack-AVR-20131216/avr/include/avr/iotn85.h:
 
 /usr/local/CrossPack-AVR-20131216/avr/include/avr/iotnx5.h:
 

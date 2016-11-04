@@ -4,8 +4,8 @@
 
 ## General Flags
 PROJECT = uDuck
-MCU = attiny45
-BURNMCU = attiny45
+MCU = attiny85
+BURNMCU = attiny85
 BURNPROGRAMMER = arduino
 BURNPORT = /dev/cu.usbserial-A8008I9o
 TARGET = uduck.elf

@@ -1,7 +1,7 @@
 usbdrvasm.o: ../usbdrv/usbdrvasm.S ../usbdrv/iarcompat.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/avr/io.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/avr/sfr_defs.h \
- /usr/local/CrossPack-AVR-20131216/avr/include/avr/iotn45.h \
+ /usr/local/CrossPack-AVR-20131216/avr/include/avr/iotn85.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/avr/iotnx5.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/avr/portpins.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/avr/common.h \
@@ -17,7 +17,7 @@ usbdrvasm.o: ../usbdrv/usbdrvasm.S ../usbdrv/iarcompat.h \
 
 /usr/local/CrossPack-AVR-20131216/avr/include/avr/sfr_defs.h:
 
-/usr/local/CrossPack-AVR-20131216/avr/include/avr/iotn45.h:
+/usr/local/CrossPack-AVR-20131216/avr/include/avr/iotn85.h:
 
 /usr/local/CrossPack-AVR-20131216/avr/include/avr/iotnx5.h:
 
