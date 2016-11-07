@@ -157,6 +157,7 @@ int main(void)
 {
     uchar i;
     uchar calibrationValue;
+    uchar mod, hid, delay;
 
     calibrationValue = eeprom_read_byte(0); // calibration value from last time
     
@@ -185,20 +186,24 @@ int main(void)
         usbPoll();
 
         if (usbInterruptIsReady() && TimerDelay == 1) {
-            if (index < sizeof(attack)) {
+            if (index < attack_size) {
+                mod   = pgm_read_byte(&(attack[index]));
+                hid   = pgm_read_byte(&(attack[index + 1]));
+                delay = pgm_read_byte(&(attack[index + 2]));
+
                 if (reportCount & 1) {
                     buildReport(0, 0);
                     usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
                 } else {
-                    buildReport(attack[index], attack[index + 1]);
+                    buildReport(mod, hid);
                     usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
                     
-                    if (attack[index + 2]) {
-                        TimerDelay = attack[index + 2] + 1;
+                    if (delay) {
+                        TimerDelay = delay + 1;
                     }
                     index += 3;
                 }
-            } else if (index == sizeof(attack)) {
+            } else if (index == attack_size) {
                 buildReport(0, 0);
                 usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
                 index = 0;
