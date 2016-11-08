@@ -67,6 +67,7 @@ To upload, you'll need `avrdude` installed. Sparkfun [has a tutorial](https://le
 Once you have AVRDUDE working, open a shell, cd into the Micronucleus `firmware` directory and enter the commands:
 
 `make fuse`
+
 `make flash`
 
 You don't need a full `avr-gcc` toolchain because we've precompiled the firmware for you. You're welcome to install an AVR toolchain and recompile. This will update the fuse settings on the ATTiny and program the bootloader in flash.
