@@ -617,22 +617,22 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x16e8
+.debug_info     0x00000000     0x16ea
  *(.debug_info)
  .debug_info    0x00000000      0x6e7 main.o
  .debug_info    0x000006e7       0x56 oddebug.o
  .debug_info    0x0000073d      0x7d4 usbdrv.o
- .debug_info    0x00000f11       0x61 usbdrvasm.o
- .debug_info    0x00000f72       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
- .debug_info    0x00001031       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_copy_data.o)
- .debug_info    0x000010f0       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
- .debug_info    0x000011af       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_divmodsi4.o)
- .debug_info    0x0000126e       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_negsi2.o)
- .debug_info    0x0000132d       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_mulsidi3.o)
- .debug_info    0x000013ec       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_prologue.o)
- .debug_info    0x000014ab       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_epilogue.o)
- .debug_info    0x0000156a       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_udivmodsi4.o)
- .debug_info    0x00001629       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_muldi3.o)
+ .debug_info    0x00000f11       0x63 usbdrvasm.o
+ .debug_info    0x00000f74       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .debug_info    0x00001033       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_copy_data.o)
+ .debug_info    0x000010f2       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ .debug_info    0x000011b1       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_divmodsi4.o)
+ .debug_info    0x00001270       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_negsi2.o)
+ .debug_info    0x0000132f       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_mulsidi3.o)
+ .debug_info    0x000013ee       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_prologue.o)
+ .debug_info    0x000014ad       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_epilogue.o)
+ .debug_info    0x0000156c       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_udivmodsi4.o)
+ .debug_info    0x0000162b       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_muldi3.o)
  *(.gnu.linkonce.wi.*)
 
 .debug_abbrev   0x00000000      0x691
@@ -674,14 +674,14 @@ END GROUP
  .debug_frame   0x00000000       0x68 main.o
  .debug_frame   0x00000068       0x58 usbdrv.o
 
-.debug_str      0x00000000      0x55d
+.debug_str      0x00000000      0x55f
  *(.debug_str)
- .debug_str     0x00000000      0x331 main.o
-                                0x373 (size before relaxing)
- .debug_str     0x00000331       0x14 oddebug.o
-                                0x113 (size before relaxing)
- .debug_str     0x00000345      0x218 usbdrv.o
-                                0x423 (size before relaxing)
+ .debug_str     0x00000000      0x333 main.o
+                                0x375 (size before relaxing)
+ .debug_str     0x00000333       0x14 oddebug.o
+                                0x115 (size before relaxing)
+ .debug_str     0x00000347      0x218 usbdrv.o
+                                0x425 (size before relaxing)
 
 .debug_loc      0x00000000      0xbbc
  *(.debug_loc)

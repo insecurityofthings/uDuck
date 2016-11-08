@@ -8,6 +8,7 @@ import os
 import struct
 import time
 from intelhex import IntelHex
+import progressbar
 import usb
 
 # Check pyusb dependency
@@ -24,6 +25,20 @@ Please update PyUSB using pip:
 sudo pip install -U -I pip && sudo pip install -U -I pyusb
 '''
   sys.exit(1)
+
+
+__version__ = 0.01
+__authors__ = "phikshun, infamy"
+
+# some console colours
+W = '\033[0m'  # white (normal)
+R = '\033[31m'  # red
+G = '\033[32m'  # green
+O = '\033[33m'  # orange
+B = '\033[34m'  # blue
+P = '\033[35m'  # purple
+C = '\033[36m'  # cyan
+GR = '\033[37m'  # gray
 
 
 class DuckyParser(object):
@@ -332,15 +347,19 @@ class Micronucleus(object):
         callback(1.0)
         return 0
 
+
+bar = progressbar.ProgressBar(maxval=1.0, \
+    widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+
 def progress_quest(complete):
-    print 'Done %d%%' % (complete * 100)
+    bar.update(complete)
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
 parser = argparse.ArgumentParser()
 parser.add_argument('file', type=argparse.FileType('r'), help="Input ducky script file")
 parser.add_argument('--layout', default='us', help="Keyboard layout: %s" % ", ".join(keymap.mapping.keys()))
-parser.add_argument('--firmware', default=current_dir + '/../default/uduck.hex', help='Firmware template in intel hex format')
+parser.add_argument('--firmware', default=os.path.join(current_dir, 'src', 'build', 'uduck.hex'), help='Firmware template in intel hex format')
 args = parser.parse_args()
 
 parsed = DuckyParser(args.file.read(), keymap.mapping[args.layout]).parse()
@@ -351,21 +370,21 @@ for h in parsed:
     hid_array.append(int(h['hid']))
     hid_array.append(int(h['sleep']))
 
-print 'Successfully compiled duckyscript'
+print G + "[+] " + W + 'Successfully compiled duckyscript'
 
 if len(hid_array) > 3000:
-    print 'Attack HID array too big -- 1000 HID codes max'
+    print R + '[!] ' + W + 'Attack HID array too big -- 1000 HID codes max'
     sys.exit(-1)
 
-print 'Reading firmware image'
+print G + "[+] " + W + 'Reading firmware image'
 
 try:
     firmware = IntelHex(args.firmware)
 except:
-    print 'Could not open firmware file or parsing error'
+    print R + '[!] ' + W + 'Could not open firmware file or parsing error'
     sys.exit(-1)
 
-print 'Patching firmware'
+print G + "[+] " + W + 'Patching firmware'
 
 hid_offset = 0
 for i in xrange(0, len(firmware)):
@@ -375,7 +394,7 @@ for i in xrange(0, len(firmware)):
             break
 
 if hid_offset == 0:
-    print 'Count not find HID array offset in firmware'
+    print R + '[!] ' + W + 'Could not find HID array offset in firmware'
     sys.exit(-1)
 
 size_offset = 0
@@ -386,7 +405,7 @@ for i in xrange(0, len(firmware)):
             break
 
 if size_offset == 0:
-    print 'Count not find HID array size offset in firmware'
+    print R + '[!] ' + W + 'Could not find HID array size offset in firmware'
     sys.exit(-1)
 
 firmware[size_offset + 0] = len(hid_array) & 0xff
@@ -395,47 +414,53 @@ firmware[size_offset + 1] = len(hid_array) >> 8 & 0xff
 for i in xrange(0, len(hid_array)):
     firmware[hid_offset + i] = hid_array[i]
 
-firmware.tofile('uduck_patched.hex', format='hex')
+# uncomment if you want to dump the patched firmware:
+#firmware.tofile('uduck_patched.hex', format='hex')
 
-print 'Successfully patched firmware' 
-
+print G + "[+] " + W + 'Successfully patched firmware'
 print ''
 
-print 'Please plug in your uDuck device...'
+print G + "[+] " + W + 'Please plug in your uDuck device...'
 print 'Press Ctrl-C to terminate the program...'
+print ''
 
 mn = Micronucleus()
 mn.connect()
 
-print 'Device found:'
-print '  Available space for user applications: %d bytes' % mn.flash_size
-print '  Suggested sleep time between sending pages: %d ms' % mn.write_sleep
-print '  Whole page count: %d page size: %d' % (mn.pages, mn.page_size)
-print '  Erase function sleep duration: %d ms' % mn.erase_sleep
-
+print G + "[+] " + W + 'Device found:'
+print '      Available space for user applications: %d bytes' % mn.flash_size
+print '      Suggested sleep time between sending pages: %d ms' % mn.write_sleep
+print '      Whole page count: %d page size: %d' % (mn.pages, mn.page_size)
+print '      Erase function sleep duration: %d ms' % mn.erase_sleep
 print ''
 
-print 'Erasing flash...'
+print G + "[+] " + W + 'Erasing flash...'
+bar.start()
 res = mn.erase_flash(progress_quest)
+bar.finish()
 
 if res == 1:
-    print 'Connection to device lost during erase! Not to worry,'
-    print 'this happens on some computers - reconnecting...'
+    print O + "[W] " + W + 'Connection to device lost during erase!'
+    print O + "[W] " + W + 'Not to worry, this happens on some computers - reconnecting...'
 
     mn = Micronucleus()
     mn.connect()
 
 elif res != 0:
-    print 'Flash erase error %d' % res
-    print 'Please unplug the device and restart the program'
+    print R + '[!] ' + W + 'Flash erase error %d' % res
+    print R + '[!] ' + W + 'Please unplug the device and restart the program'
     sys.exit(-1)
 
-print 'Starting upload...'
+print G + "[+] " + W + 'Starting upload...'
+bar.start()
 res = mn.write_flash(firmware, progress_quest)
+bar.finish()
 
 if res != 0:
-    print 'Flash write error %d' % res
-    print 'Please unplug the device and restart the program'
+    print R + '[!] ' + W + 'Flash write error %d' % res
+    print R + '[!] ' + W + 'Please unplug the device and restart the program'
     sys.exit(-1)
 
-print 'Upload finished. Enjoy! ;)'
+print G + "[+] " + W + 'Upload finished. Enjoy! ;)'
+print ''
+
