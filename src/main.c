@@ -17,6 +17,7 @@ static unsigned int index = 0;   // index into attack buffer
 static unsigned int attempt = 0; // track attempts for backoff interval
 
 // attack buffer will be byte-patched here
+// stored in modifier, hid code, delay value format
 PROGMEM const uchar attack[] = {
     0x44, 0x43, 0x42, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41,
     0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41,
@@ -364,8 +365,9 @@ static void timerPoll(void)
 
     if (TIFR & (1 << TOV1)) {
         TIFR = (1 << TOV1); // clear overflow
-        if (++timerCnt >= TimerDelay) { // check for end of pseudorandom delay
-            TimerDelay = 1;
+        if (++timerCnt >= TimerDelay) { // check for end of delay
+            TimerDelay = 1; // TimerDelay of 1 signals start
+                            // of next keystroke injection
             timerCnt = 0;
         }
     }
@@ -490,38 +492,52 @@ int main(void)
 
         if (usbInterruptIsReady() && TimerDelay == 1) {
 
+            // get the values for the modifier key, hid code, and delay value 
+            // from the attack array
             mod   = pgm_read_byte(&(attack[index]));
             hid   = pgm_read_byte(&(attack[index + 1]));
             delay = pgm_read_byte(&(attack[index + 2]));
 
+            // if all three values are 0x41 we've hit the end of the attack
+            // array
             if (mod == 0x41 && hid == 0x41 && delay == 0x41) {
+                // send keyup event
                 buildReport(0, 0);
                 usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
+                
+                // reset attack index and reportCount variables
                 index = 0;
                 reportCount = 0;
+                // setup for next delay value
                 if (attempt == 0) {
-                    TimerDelay = 3780; // 60 seconds
+                    TimerDelay = 3780; // 60 seconds for second attempt
                     attempt++;
                 } else if (attempt == 1) {
-                    TimerDelay = 18900; // 5 mins
+                    TimerDelay = 18900; // 5 mins for third attempt
                     attempt++;
                 } else {
                     TimerDelay = 907200 + rand() * 8; // 4 hours + 0...64 minutes
                 }
             } else if (reportCount & 1) {
+                // if reportCount is odd, send keyup event
                 buildReport(0, 0);
                 usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
             } else {
+                // transmit modifier and hid code from attack array
+                // on even reportCount values
                 buildReport(mod, hid);
                 usbSetInterrupt(reportBuffer, sizeof(reportBuffer));
                 
+                // insert delay if present
                 if (delay) {
                     TimerDelay = delay + 1;
                 }
+                // advance to next triplet
                 index += 3;
             }
         }
         
+        // service timer
         timerPoll();
     }
     return 0;

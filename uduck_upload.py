@@ -449,4 +449,3 @@ if res != 0:
 
 print G + "[+] " + W + 'Upload finished. Enjoy! ;)'
 print ''
-
