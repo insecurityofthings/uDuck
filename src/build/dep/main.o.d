@@ -20,7 +20,7 @@ main.o: ../main.c /usr/local/CrossPack-AVR-20131216/avr/include/avr/io.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/math.h \
  /usr/local/CrossPack-AVR-20131216/avr/include/stdlib.h \
  ../usbdrv/usbdrv.h .././usbconfig.h ../usbdrv/iarcompat.h \
- ../usbdrv/oddebug.h ../attack.h
+ ../usbdrv/oddebug.h
 
 /usr/local/CrossPack-AVR-20131216/avr/include/avr/io.h:
 
@@ -71,5 +71,3 @@ main.o: ../main.c /usr/local/CrossPack-AVR-20131216/avr/include/avr/io.h \
 ../usbdrv/iarcompat.h:
 
 ../usbdrv/oddebug.h:
-
-../attack.h:

@@ -397,25 +397,11 @@ if hid_offset == 0:
     print R + '[!] ' + W + 'Could not find HID array offset in firmware'
     sys.exit(-1)
 
-size_offset = 0
-for i in xrange(0, len(firmware)):
-    if firmware[i] == 0x99:
-        if firmware[i+1] == 0x99:
-            size_offset = i
-            break
-
-if size_offset == 0:
-    print R + '[!] ' + W + 'Could not find HID array size offset in firmware'
-    sys.exit(-1)
-
-firmware[size_offset + 0] = len(hid_array) & 0xff
-firmware[size_offset + 1] = len(hid_array) >> 8 & 0xff
-
 for i in xrange(0, len(hid_array)):
     firmware[hid_offset + i] = hid_array[i]
 
 # uncomment if you want to dump the patched firmware:
-#firmware.tofile('uduck_patched.hex', format='hex')
+# firmware.tofile('uduck_patched.hex', format='hex')
 
 print G + "[+] " + W + 'Successfully patched firmware'
 print ''
